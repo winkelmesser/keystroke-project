@@ -1,30 +1,32 @@
 # ✅ Keystroke Dynamics Lernprojekt – Checkliste
 
 Diese Checkliste begleitet das Projekt Schritt für Schritt.  
-Jede Phase kann abgehakt werden, wenn sie fertig ist.  
+Jede Phase kann abgehakt werden, wenn sie fertig ist.
 
 ---
 
 ## Phase 0 – Setup
-- [ ] Node.js LTS installiert (`node -v`)
-- [ ] npm installiert (`npm -v`)
-- [ ] Python 3.10+ installiert (`python --version`)
-- [ ] Git installiert (`git --version`)
-- [ ] VS Code installiert + Extensions (ESLint, Prettier, GitLens, Python)
-- [ ] (Optional) Docker Desktop installiert
-- [ ] Projektordner `keystroke-project` angelegt
-- [ ] Git Repo initialisiert (`git init`)
-- [ ] `.gitignore` angelegt
-- [ ] README.md angelegt
-- [ ] Erster Commit gemacht
-- [ ] GitHub Repo erstellt
-- [ ] Remote verbunden (`git remote -v`)
-- [ ] Commit auf GitHub sichtbar
-- [ ] Basis-Struktur angelegt: `frontend`, `backend`, `ml`, `infra`, `docs`
+
+- [x] Node.js LTS installiert (`node -v`)
+- [x] npm installiert (`npm -v`)
+- [x] Python 3.10+ installiert (`python --version`)
+- [x] Git installiert (`git --version`)
+- [x] VS Code installiert + Extensions (ESLint, Prettier, GitLens, Python)
+- [x] (Optional) Docker Desktop installiert
+- [x] Projektordner `keystroke-project` angelegt
+- [x] Git Repo initialisiert (`git init`)
+- [x] `.gitignore` angelegt
+- [x] README.md angelegt
+- [x] Erster Commit gemacht
+- [x] GitHub Repo erstellt
+- [x] Remote verbunden (`git remote -v`)
+- [x] Commit auf GitHub sichtbar
+- [x] Basis-Struktur angelegt: `frontend`, `backend`, `ml`, `infra`, `docs`
 
 ---
 
 ## Phase 1 – Frontend (React + Tailwind)
+
 - [ ] React mit Vite eingerichtet
 - [ ] Tailwind installiert und konfiguriert
 - [ ] Consent-Dialog erstellt
@@ -34,6 +36,7 @@ Jede Phase kann abgehakt werden, wenn sie fertig ist.
 ---
 
 ## Phase 2 – Backend (Express API)
+
 - [ ] Express-Projekt eingerichtet
 - [ ] Route `/collect` erstellt
 - [ ] Events werden (zunächst in Memory) gespeichert
@@ -42,6 +45,7 @@ Jede Phase kann abgehakt werden, wenn sie fertig ist.
 ---
 
 ## Phase 3 – Datenbank (SQLite)
+
 - [ ] SQLite eingebunden (`better-sqlite3`)
 - [ ] Tabellen `sessions` & `events` erstellt
 - [ ] `/collect` schreibt Events in DB
@@ -50,12 +54,14 @@ Jede Phase kann abgehakt werden, wenn sie fertig ist.
 ---
 
 ## Phase 4 – Feature Engineering
+
 - [ ] Feature-Funktion implementiert
 - [ ] Route `/features/:id` gibt Features zurück
 
 ---
 
 ## Phase 5 – Machine Learning (Python)
+
 - [ ] Python venv erstellt
 - [ ] Pakete installiert (`pandas`, `scikit-learn`, `joblib`)
 - [ ] `train.py` erstellt
@@ -66,6 +72,7 @@ Jede Phase kann abgehakt werden, wenn sie fertig ist.
 ---
 
 ## Phase 6 – ML-Service
+
 - [ ] Flask API erstellt
 - [ ] Route `/predict` implementiert
 - [ ] Backend ruft ML-Service erfolgreich auf
@@ -73,6 +80,7 @@ Jede Phase kann abgehakt werden, wenn sie fertig ist.
 ---
 
 ## Phase 7 – Git Workflow
+
 - [ ] Branch-Strategie eingerichtet
 - [ ] Feature-Branches genutzt
 - [ ] PR-Workflow getestet
@@ -80,6 +88,7 @@ Jede Phase kann abgehakt werden, wenn sie fertig ist.
 ---
 
 ## Phase 8 – Tests & CI
+
 - [ ] Linter eingerichtet (ESLint, Prettier)
 - [ ] Jest/Vitest Tests für Frontend/Backend
 - [ ] GitHub Actions Workflow erstellt
@@ -88,6 +97,7 @@ Jede Phase kann abgehakt werden, wenn sie fertig ist.
 ---
 
 ## Phase 9 – Docker
+
 - [ ] Dockerfile für Backend
 - [ ] Dockerfile für Frontend
 - [ ] docker-compose eingerichtet
@@ -96,6 +106,7 @@ Jede Phase kann abgehakt werden, wenn sie fertig ist.
 ---
 
 ## Phase 10 – Deployment
+
 - [ ] Frontend auf Vercel/Netlify deployt
 - [ ] Backend auf Render/Railway deployt
 - [ ] PostgreSQL DB eingerichtet
@@ -105,6 +116,7 @@ Jede Phase kann abgehakt werden, wenn sie fertig ist.
 ---
 
 ## Phase 11 – UI & Visualisierung
+
 - [ ] Recharts/Chart.js eingebaut
 - [ ] Prediction mit Confidence angezeigt
 - [ ] Animationen & UX verbessert
@@ -112,8 +124,8 @@ Jede Phase kann abgehakt werden, wenn sie fertig ist.
 ---
 
 ## Phase 12 – Dokumentation & Datenschutz
+
 - [ ] README.md mit Setup & Deploy-Anleitung
 - [ ] DSGVO-konformes Consent-Formular eingebunden
 - [ ] Data-Retention Konzept umgesetzt
 - [ ] Projekt fertig 🎉
-
