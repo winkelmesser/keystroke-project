@@ -27,11 +27,11 @@ Jede Phase kann abgehakt werden, wenn sie fertig ist.
 
 ## Phase 1 – Frontend (React + Tailwind)
 
-- [ ] React mit Vite eingerichtet
-- [ ] Tailwind installiert und konfiguriert
-- [ ] Consent-Dialog erstellt
-- [ ] Textarea eingebaut
-- [ ] Tipp-Events (keydown/keyup) loggen in Konsole
+- [x] React mit Vite eingerichtet
+- [x] Tailwind installiert und konfiguriert
+- [x] Consent-Dialog erstellt
+- [x] Textarea eingebaut
+- [x] Tipp-Events (keydown/keyup) loggen in Konsole
 
 ---
 
