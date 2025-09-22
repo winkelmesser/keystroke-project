@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 const PORT = 3001;
@@ -7,6 +9,22 @@ const PORT = 3001;
 //Middleware
 app.use(cors());
 app.use(express.json());
+
+//Pfad zur JSON-Datei
+const DATA_FILE = path.join(__dirname, "data","session.json");
+
+//Lade Daten aus der Datei
+function loadData() {
+  if (!fs.existsSync(DATA_FILE)) return {};
+    const raw = fs.readFileSync(DATA_FILE, "utf-8");
+    return raw ? JSON.parse(raw) : {};
+  }
+
+//Speichere Daten in die Datei
+function saveData(data) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
+
 
 //--In-Memory Store
 const session = {}
@@ -24,23 +42,33 @@ app.post("/collect", (req, res) => {
     return res.status(400).json({ message: "Ungültige Daten" });
     }
 
+    //Lade bestehende Daten
+    const data = loadData();
+
     //Falls Session noch nicht existiert, erstelle sie
-    if (!session[sessionId]) {
-    session[sessionId] = [];
+    if (!data[sessionId]) {
+    data[sessionId] = [];
     }
 
     //Events hinzufügen
-    session[sessionId].push(...events);
-    console.log(`Session ${sessionId} hat jetzt ${session[sessionId].length} Events.`);
-    res.json({status: "ok", totalEvents: session[sessionId].length});
+    data[sessionId].push(...events);
+    
+    //Daten speichern
+    saveData(data);
+
+    console.log(`Session ${sessionId}: ${events.length} Events empfangen (gesamt: ${data[sessionId].length})`);
+    res.json({status:'ok', totalEvents: data[sessionId].length});
 });
 
 app.get("/session/:id", (req, res) => {
     const { id } = req.params;
-    if (!session[id]) {
+    const data = loadData();
+
+    if (!data[id]) {
         return res.status(404).json({ message: "Session nicht gefunden" });
     }
-    res.json({ sessionId: id, events: session[id] });
+
+    res.json({ sessionId: id, events: data[id] });
 });
 
 
