@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const db = require("./db");
 
 const app = express();
 const PORT = 3001;
@@ -42,33 +43,39 @@ app.post("/collect", (req, res) => {
     return res.status(400).json({ message: "Ungültige Daten" });
     }
 
-    //Lade bestehende Daten
-    const data = loadData();
+    //Sessin anlegen falls nicht vorhanden
+    const insertSession = db.prepare("INSERT OR IGNORE INTO sessions (id) VALUES (?)");
+    insertSession.run(sessionId);
 
-    //Falls Session noch nicht existiert, erstelle sie
-    if (!data[sessionId]) {
-    data[sessionId] = [];
-    }
+    //Event einfügen
+    const insertEvent = db.prepare("INSERT INTO events (session_id, key_code, key_value, event_type, t) VALUES (?, ?, ?, ?, ?)");
 
-    //Events hinzufügen
-    data[sessionId].push(...events);
-    
-    //Daten speichern
-    saveData(data);
+    const insertMany = db.transaction((events) => {
+      for (const ev of events) {
+        insertEvent.run(sessionId, ev.code, ev.key, ev.type, ev.time);
+      }
+    });
 
-    console.log(`Session ${sessionId}: ${events.length} Events empfangen (gesamt: ${data[sessionId].length})`);
-    res.json({status:'ok', totalEvents: data[sessionId].length});
+    insertMany(events);
+
+    console.log(`Session ${sessionId}: ${events.length} Events gespeichert (SQLite)`);
+    res.json({status:'ok', saved : events.length });
 });
 
 app.get("/session/:id", (req, res) => {
     const { id } = req.params;
-    const data = loadData();
+    const session = db
+      .prepare("SELECT * FROM sessions WHERE id = ?")
+      .get(id);
 
-    if (!data[id]) {
-        return res.status(404).json({ message: "Session nicht gefunden" });
+    if (!session) {
+      return res.status(404).json({ message: "Session nicht gefunden" });
     }
+    const events = db
+      .prepare("SELECT key_code, key_value, event_type, t FROM events WHERE session_id = ? ORDER BY id ASC")
+      .all(id);
 
-    res.json({ sessionId: id, events: data[id] });
+    res.json({ sessionId: id, created_at: session.created_at, events});
 });
 
 
