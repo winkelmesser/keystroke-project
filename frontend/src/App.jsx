@@ -2,6 +2,9 @@ import { useState, useRef } from "react";
 import "./App.css";
 import FingerprintView from "./components/FingerprintView";
 import FingerprintCompare from "./components/FingerprintCompare";
+import Mimicry from "./components/Mimicry";
+
+
 
 function App() {
   const [consent, setConsent] = useState(false);
@@ -9,6 +12,7 @@ function App() {
   const [events, setEvents] = useState([]);
   const [status, setStatus] = useState("idle");
   const [lastSessionId, setLastSessionId] = useState(null);
+  const [view, setView] = useState("capture");
 
   // Event-Handler
   const handleKeyDown = (e) => {
@@ -160,6 +164,15 @@ function App() {
             </div>
             </>
           )}
+
+          {/* Tab Buttons */}
+            <div className="flex gap-2 mb-4">
+              <button onClick={() => setView("capture")} className={`px-3 py-1 rounded ${view === "capture" ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Capture</button>
+              <button onClick={() => setView("mimicry")} className={`px-3 py-1 rounded ${view === "mimicry" ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Mimicry</button>
+            </div>
+
+          {/* Conditional rendering */}
+            {view === "mimicry" && <Mimicry />}
         </div>
       )}
     </div>
