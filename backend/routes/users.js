@@ -56,4 +56,52 @@ router.delete("/:id/data", (req, res) => {
   }
 });
 
+// GET /api/users/:id/avg-features
+router.get("/:id/avg-features", (req, res) => {
+  const userId = req.params.id;
+  
+  
+  try {
+    // alle Session-IDs des Users
+    const sessions = db
+      .prepare("SELECT id FROM sessions WHERE user_id = ?")
+      .all(userId);
+
+    if (!sessions.length) {
+      return res.status(404).json({ error: "Keine Sessions für diesen User" });
+    }
+
+    const allFeatures = [];
+    const selectEvents = db.prepare(
+      "SELECT event_type, key_code, key_value, t FROM events WHERE session_id = ? ORDER BY t"
+    );
+
+    for (const s of sessions) {
+      const events = selectEvents.all(s.id);
+      if (events.length) {
+        const f = extractFeatures(events);
+        allFeatures.push(f);
+      }
+    }
+
+    if (!allFeatures.length) {
+      return res.status(404).json({ error: "Keine Features für diesen User" });
+    }
+
+    // Mittelwerte über alle Sessions bilden
+    const featureKeys = Object.keys(allFeatures[0]);
+    const avg = {};
+    for (const k of featureKeys) {
+      const values = allFeatures.map((f) => f[k]);
+      const sum = values.reduce((a, b) => a + b, 0);
+      avg[k] = sum / values.length;
+    }
+
+    res.json({ userId, sessions: sessions.length, avgFeatures: avg });
+  } catch (err) {
+    console.error("❌ avg-features error", err);
+    res.status(500).json({ error: "DB error" });
+  }
+});
+
 module.exports = router;

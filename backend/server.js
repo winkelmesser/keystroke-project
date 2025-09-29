@@ -7,7 +7,9 @@ const db = require("./db");
 
 const usersRouter = require("./routes/users");
 const phrasesRouter = require("./routes/phrases");
-
+const collectRouter = require("./routes/collect");
+const featuresRouter = require("./routes/features");
+const sessionsRouter = require("./routes/sessions");
 
 const app = express();
 const PORT = 3001;
@@ -18,6 +20,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", usersRouter);
 app.use("/api/phrases", phrasesRouter);
+app.use("/api/collect", collectRouter);
+app.use("/api/features", featuresRouter);
+app.use("/api/sessions", sessionsRouter);
 
 //Pfad zur JSON-Datei
 const DATA_FILE = path.join(__dirname, "data","session.json");
@@ -44,31 +49,7 @@ app.get("/", (req, res) => {
 });
 
 //Route zum Sammeln der Events
-app.post("/collect", (req, res) => {
-  const { sessionId, events } = req.body;
 
-    if (!sessionId || !Array.isArray(events)) {
-    return res.status(400).json({ message: "Ungültige Daten" });
-    }
-
-    //Sessin anlegen falls nicht vorhanden
-    const insertSession = db.prepare("INSERT OR IGNORE INTO sessions (id) VALUES (?)");
-    insertSession.run(sessionId);
-
-    //Event einfügen
-    const insertEvent = db.prepare("INSERT INTO events (session_id, key_code, key_value, event_type, t) VALUES (?, ?, ?, ?, ?)");
-
-    const insertMany = db.transaction((events) => {
-      for (const ev of events) {
-        insertEvent.run(sessionId, ev.code, ev.key, ev.type, ev.time);
-      }
-    });
-
-    insertMany(events);
-
-    console.log(`Session ${sessionId}: ${events.length} Events gespeichert (SQLite)`);
-    res.json({status:'ok', saved : events.length });
-});
 
 app.get("/session/:id", (req, res) => {
     const { id } = req.params;

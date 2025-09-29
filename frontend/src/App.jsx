@@ -1,23 +1,22 @@
-import { useState, useRef } from 'react';
-import './App.css'
-
+import { useState, useRef } from "react";
+import "./App.css";
+import FingerprintView from "./components/FingerprintView";
+import FingerprintCompare from "./components/FingerprintCompare";
 
 function App() {
   const [consent, setConsent] = useState(false);
   const textareaRef = useRef();
   const [events, setEvents] = useState([]);
   const [status, setStatus] = useState("idle");
-
-  // Generiere eine zufällige Session-ID
-  const sessionId = "sess_" + Math.random().toString(36).slice(2, 9);
+  const [lastSessionId, setLastSessionId] = useState(null);
 
   // Event-Handler
   const handleKeyDown = (e) => {
-      const entry = {
-      type: "down",
-      key: e.key,
-      code: e.code,
-      time: performance.now(),
+    const entry = {
+      event_type: "down",
+      key_value: e.key,
+      key_code: e.code,
+      t: performance.now(),
     };
     setEvents((prev) => [...prev, entry]);
     console.log(entry);
@@ -26,17 +25,17 @@ function App() {
 
   const handleKeyUp = (e) => {
     const entry = {
-      type: "up",
-      key: e.key,
-      code: e.code,
-      time: performance.now(),
+      event_type: "up",
+      key_value: e.key,
+      key_code: e.code,
+      t: performance.now(),
     };
     setEvents((prev) => [...prev, entry]);
     console.log(entry);
     if (consent) return;
   };
 
-  //Funktion zum Backend senden
+  // Funktion: Events an Backend senden
   const sendToBackend = async () => {
     if (events.length === 0) {
       setStatus("Keine Events zum Senden");
@@ -44,17 +43,22 @@ function App() {
     }
     try {
       setStatus("Senden...");
-      const res = await fetch('http://localhost:3001/collect', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json',},
-        body: JSON.stringify({ 
-          sessionId, 
-          events, 
+      const res = await fetch("http://localhost:3001/api/collect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: "train", // oder "attack" / "anon"
+          userId: "user_123", // optional",
+          phraseId: null,
+          events,
         }),
       });
-      if (res.ok) {
+
+      const json = await res.json();
+      if (res.ok && json.sessionId) {
         setStatus("Erfolgreich gesendet!");
-        setEvents([]); // Events nach dem Senden löschen
+        setLastSessionId(json.sessionId); // Session-ID merken
+        setEvents([]); // Events zurücksetzen
       } else {
         setStatus("Fehler beim Senden");
       }
@@ -63,7 +67,6 @@ function App() {
       setStatus("Server nicht erreichbar");
     }
   };
-
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
@@ -99,19 +102,21 @@ function App() {
             placeholder="Starte mit Tippen..."
           />
 
-          {/*Buttons*/}
-          <div className='flex gap-2 mb-2'>
+          {/* Buttons */}
+          <div className="flex gap-2 mb-2">
             <button
               onClick={sendToBackend}
-              className="mt-2 px-3 py-1 bg-blue-500 text-white rounded">
-                Events senden
-              </button>
-              <button onClick={() => setEvents([])}
-                className="px-4 py-2 bg-red-500 text-white rounded"
-              >
-                Reset 
-              </button>
-            </div>
+              className="mt-2 px-3 py-1 bg-blue-500 text-white rounded"
+            >
+              Events senden
+            </button>
+            <button
+              onClick={() => setEvents([])}
+              className="px-4 py-2 bg-red-500 text-white rounded"
+            >
+              Reset
+            </button>
+          </div>
 
           {/* Event-Tabelle */}
           <div className="overflow-x-auto bg-white shadow rounded">
@@ -129,21 +134,32 @@ function App() {
                 {events.map((ev, i) => (
                   <tr key={i} className="border-b">
                     <td className="px-3 py-1">{i + 1}</td>
-                    <td className="px-3 py-1">{ev.type}</td>
-                    <td className="px-3 py-1">{ev.key}</td>
-                    <td className="px-3 py-1">{ev.code}</td>
-                    <td className="px-3 py-1">{ev.time.toFixed(2)}</td>
+                    <td className="px-3 py-1">{ev.event_type}</td>
+                    <td className="px-3 py-1">{ev.key_value}</td>
+                    <td className="px-3 py-1">{ev.key_code}</td>
+                    <td className="px-3 py-1">{ev.t.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        
-        {/* Statusanzeige */}
-        <p class="mt-2 text-sm text-gray-600">
-          Status: <span className="font-semibold" >{status}</span>
-        </p>
 
+          {/* Statusanzeige */}
+          <p className="mt-2 text-sm text-gray-600">
+            Status: <span className="font-semibold">{status}</span>
+          </p>
+
+          {/* FingerprintView */}
+          {lastSessionId && (
+            <>
+            <div className="mt-8">
+              <FingerprintView sessionId={lastSessionId} />
+            </div>
+            <div>
+              <FingerprintCompare sessionId={lastSessionId} user />
+            </div>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -151,4 +167,3 @@ function App() {
 }
 
 export default App;
-
