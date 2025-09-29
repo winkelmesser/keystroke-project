@@ -10,6 +10,7 @@ const phrasesRouter = require("./routes/phrases");
 const collectRouter = require("./routes/collect");
 const featuresRouter = require("./routes/features");
 const sessionsRouter = require("./routes/sessions");
+const attackRouter = require("./routes/attack");
 
 const app = express();
 const PORT = 3001;
@@ -23,6 +24,8 @@ app.use("/api/phrases", phrasesRouter);
 app.use("/api/collect", collectRouter);
 app.use("/api/features", featuresRouter);
 app.use("/api/sessions", sessionsRouter);
+app.use("/api/attack", attackRouter);
+
 
 //Pfad zur JSON-Datei
 const DATA_FILE = path.join(__dirname, "data","session.json");
