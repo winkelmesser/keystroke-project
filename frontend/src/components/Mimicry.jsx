@@ -2,18 +2,17 @@ import React, { useEffect, useState, useRef } from "react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend
 } from "recharts";
+import useKeystrokeCapture from "../hooks/useKeystrokeCapture";
 
-/**
- * Mimicry component
- * Props: none (uses /api/users, /api/attack/mimic)
- */
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+
 export default function Mimicry() {
   const [users, setUsers] = useState([]);
-  const [targetUserId, setTargetUserId] = useState(null);
+  const [targetUserId, setTargetUserId] = useState("");
   const [consent, setConsent] = useState(false);
 
-  const [events, setEvents] = useState([]);
-  const [attempts, setAttempts] = useState([]); // { attemptIndex, score, time }
+  const { events, onKeyDown, onKeyUp, reset, count } = useKeystrokeCapture();
+  const [attempts, setAttempts] = useState([]); // { attempt, score, time }
   const [status, setStatus] = useState("idle");
   const [isTyping, setIsTyping] = useState(false);
 
@@ -21,10 +20,9 @@ export default function Mimicry() {
   const attemptCounter = useRef(0);
 
   useEffect(() => {
-    // Nutzerliste laden
     async function loadUsers() {
       try {
-        const res = await fetch("http://localhost:3001/api/users");
+        const res = await fetch(`${API_BASE}/api/users`);
         const json = await res.json();
         setUsers(json.users || []);
       } catch (err) {
@@ -34,18 +32,16 @@ export default function Mimicry() {
     loadUsers();
   }, []);
 
-  // Key handlers
   const handleKeyDown = (e) => {
-    const entry = { event_type: "down", key_code: e.code, key_value: e.key, t: performance.now() };
-    setEvents((prev) => [...prev, entry]);
+    if (!consent) return; // Tippdaten nur mit Einwilligung
     setIsTyping(true);
+    onKeyDown(e);
   };
   const handleKeyUp = (e) => {
-    const entry = { event_type: "up", key_code: e.code, key_value: e.key, t: performance.now() };
-    setEvents((prev) => [...prev, entry]);
+    if (!consent) return;
+    onKeyUp(e);
   };
 
-  // single attempt: send to backend
   const doAttempt = async () => {
     if (!consent) {
       alert("Bitte zuerst zustimmen (Consent).");
@@ -61,9 +57,8 @@ export default function Mimicry() {
     }
 
     setStatus("Senden...");
-
     try {
-      const res = await fetch("http://localhost:3001/api/attack/mimic", {
+      const res = await fetch(`${API_BASE}/api/attack/mimic`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ targetUserId, events }),
@@ -86,8 +81,7 @@ export default function Mimicry() {
       console.error("Fehler beim Mimicry-Request:", err);
       setStatus("Netzwerkfehler");
     } finally {
-      // reset events for next try
-      setEvents([]);
+      reset();          // Events leeren
       setIsTyping(false);
     }
   };
@@ -96,6 +90,8 @@ export default function Mimicry() {
     setAttempts([]);
     attemptCounter.current = 0;
     setStatus("idle");
+    reset();
+    setIsTyping(false);
   };
 
   return (
@@ -104,16 +100,14 @@ export default function Mimicry() {
 
       <div className="bg-white p-4 rounded shadow">
         <p className="text-gray-700 mb-2">
-          Dieses Experiment ist rein didaktisch: Wähle ein Ziel (Target-User) mit vorhandenen
-          Trainings-Sessions. Versuche anschließend, deren Tippmuster zu imitieren. Nutze bitte
-          nur neutrale Test-Sätze (keine Passwörter oder persönliche Daten). Zustimmung ist
-          erforderlich.
+          Didaktisches Experiment: Wähle ein Ziel (User mit Trainings-Sessions) und versuche, dessen Tippmuster zu imitieren.
+          Nutze nur neutrale Test-Sätze. Zustimmung ist erforderlich.
         </p>
 
         <div className="flex items-center gap-4 mb-3">
           <label className="block text-sm font-medium text-gray-700">Ziel-User</label>
           <select
-            value={targetUserId || ""}
+            value={targetUserId}
             onChange={(e) => setTargetUserId(e.target.value)}
             className="border px-2 py-1 rounded"
           >
@@ -142,13 +136,14 @@ export default function Mimicry() {
           onKeyUp={handleKeyUp}
           className="w-full p-3 border rounded"
           placeholder="z. B. 'this is a demo sentence'"
+          disabled={!consent}
         />
 
         {isTyping && (
-            <p class Name="mt-1 text-sm text-green-600">
-                Eingabe läuft… (Events werden aufgezeichnet)
-            </p>
-        )}        
+          <p className="mt-1 text-sm text-green-600">
+            Eingabe läuft… (Events werden aufgezeichnet) — Events: <b>{count}</b>
+          </p>
+        )}
 
         <div className="flex gap-2 mt-3">
           <button
@@ -158,7 +153,7 @@ export default function Mimicry() {
           >
             Versuch durchführen
           </button>
-          <button onClick={() => { setEvents([]); setIsTyping(false); }} className="px-3 py-1 bg-gray-200 rounded">
+          <button onClick={() => { reset(); setIsTyping(false); }} className="px-3 py-1 bg-gray-200 rounded">
             Events zurücksetzen
           </button>
           <button onClick={resetAttempts} className="px-3 py-1 bg-red-500 text-white rounded">

@@ -11,7 +11,7 @@ export default function Capture() {
   const [consent, setConsent] = useState(false);
 
   // einfache „Benutzerwahl“ (bis wir echtes User-Management anbinden)
-  const [userId, setUserId] = useState("user_demo");
+  const [userId, setUserId] = useState("user ID eingeben");
   const [mode, setMode] = useState("train");     // "train" | "attack" | "anon"
   const [phraseId, setPhraseId] = useState("");  // optional
 
